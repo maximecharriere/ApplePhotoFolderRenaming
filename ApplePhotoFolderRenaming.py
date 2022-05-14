@@ -2,19 +2,21 @@ import re
 import os
 from datetime import date, datetime
 import locale
+import unicodedata
 
 def renameApplePhotoFolder(dir, local='en'):
     locale.setlocale(locale.LC_TIME, local)
 
     for entry in os.scandir(dir):
         if os.path.isdir(entry):
-
+            # Normalize Unicode. For ex. 'e' + '´' become 'é'
+            folderName = unicodedata.normalize('NFC',entry.name) 
             # Handles rereading of changed folders
-            matched = re.match('[0-9]{4}-[0-9]{2}-[0-9]{2}[,]?', entry.name)
+            matched = re.match('[0-9]{4}-[0-9]{2}-[0-9]{2}[,]?', folderName)
             if bool(matched):
                 continue
 
-            tokens = entry.name.split(",")
+            tokens = folderName.split(",")
             dateStr = tokens[-1]
             loc = ','.join(tokens[:-1])
 
@@ -32,5 +34,5 @@ def renameApplePhotoFolder(dir, local='en'):
 
 
 if __name__ == '__main__':
-    
-    renameApplePhotoFolder(r'E:\Export\Photos', 'fr_FR')
+    srcDir = r'/Volumes/TOSHIBA EXT/backup-photos'
+    renameApplePhotoFolder(srcDir, 'fr_FR')
